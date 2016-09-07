@@ -1,8 +1,29 @@
+//import java.awt.Toolkit;
+
 public class CPB{
     public static void main(String [] args){
-        FailureHandler failureHandler = new FailureHandler();
-        MonitoringModule MonitoringModule = new MonitoringModule();
-        Thread bloodPump = new Thread(new BloodPump());
-        Thread oxygenator = new Thread(new Oxygenator());
+        MonitoringModule monitoringModule = new MonitoringModule();
+        BloodPump bloodPump = new BloodPump();
+        Oxygenator oxygenator = new Oxygenator();
+
+        //Toolkit.getDefaultToolkit().beep();
+        //System.out.print("\007");
+
+        bloodPump.addObserver(monitoringModule);
+        oxygenator.addObserver(monitoringModule);
+
+        Thread bloodPumpThread = new Thread(bloodPump);
+        Thread oxygenatorThread = new Thread(oxygenator);
+
+        bloodPumpThread.start();
+        oxygenatorThread.start();
+        try{
+            Thread.sleep(500);
+        } catch(InterruptedException e){ }
+
+        monitoringModule.start();
+
+        FailureGenerator failureGenerator = new FailureGenerator();
+        failureGenerator.generateFailure();
     }
 }
