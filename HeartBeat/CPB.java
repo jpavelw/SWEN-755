@@ -1,13 +1,8 @@
-//import java.awt.Toolkit;
-
 public class CPB{
     public static void main(String [] args){
         MonitoringModule monitoringModule = new MonitoringModule();
         BloodPump bloodPump = new BloodPump();
         Oxygenator oxygenator = new Oxygenator();
-
-        //Toolkit.getDefaultToolkit().beep();
-        //System.out.print("\007");
 
         bloodPump.addObserver(monitoringModule);
         oxygenator.addObserver(monitoringModule);
