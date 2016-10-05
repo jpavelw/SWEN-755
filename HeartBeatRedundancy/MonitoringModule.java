@@ -79,6 +79,7 @@ public class MonitoringModule extends UnicastRemoteObject implements MonitorI {
         try {
             MonitorI monitoringModule = new MonitoringModule();
             Naming.rebind("rmi://localhost:5000/monitor", monitoringModule);
+			 System.out.println("Monitoring Module is RUNNING!");
             monitoringModule.checkHeartBeats();
         } catch(Exception e){
             e.printStackTrace();

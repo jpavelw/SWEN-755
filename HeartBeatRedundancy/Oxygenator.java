@@ -12,8 +12,12 @@ public class Oxygenator extends UnicastRemoteObject implements HeartBeatI {
             while(true){
                 monitor.receiveHeartBeat(monitor.OXYGENATOR_MAIN);
                 Thread.sleep(1000);
-                if(!ErrorGenerator.generateError())
-                    System.exit(0);
+                if(!ErrorGenerator.generateError()) {
+					System.out.println("Oxygenator is GOING DOWN");
+                    System.exit(0);                	
+                } else {
+					System.out.println("Oxygenator is RUNNING");
+                }
             }
         } catch(Exception e) {
             e.printStackTrace();

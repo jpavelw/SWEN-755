@@ -12,8 +12,12 @@ public class BloodPump extends UnicastRemoteObject implements HeartBeatI {
             while(true){
                 monitor.receiveHeartBeat(monitor.BLOODPUMP_MAIN);
                 Thread.sleep(1000);
-                if(!ErrorGenerator.generateError())
-                    System.exit(0);
+                if(!ErrorGenerator.generateError()) {
+					System.out.println("BloodPump is GOING DOWN");
+                    System.exit(0);                	
+                } else {
+					System.out.println("BloodPump is RUNNING");
+                }
             }
         } catch(Exception e) {
             e.printStackTrace();
