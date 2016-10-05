@@ -40,6 +40,7 @@ public class MonitoringModule extends UnicastRemoteObject implements MonitorI {
             if(this.iAmAlive[0]){
                 System.out.println("### MAIN BLOODPUMP BEATING ###");
                 this.iAmAlive[0] = false;
+				this.didSwitchBloodPump = false;
             } else if(!this.iAmAlive[0] && this.iAmAlive[1]) {
 				this.iAmAlive[1] = false;
 				
@@ -54,6 +55,7 @@ public class MonitoringModule extends UnicastRemoteObject implements MonitorI {
             if(this.iAmAlive[2]){
                 System.out.println("### MAIN OXYGENATOR BEATING ###");
                 this.iAmAlive[2] = false;
+				this.didSwitchOxygenator = false;
             } else if(!this.iAmAlive[2] && this.iAmAlive[3]) {
 				this.iAmAlive[3] = false;
 				
