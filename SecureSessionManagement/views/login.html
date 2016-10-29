@@ -1,7 +1,13 @@
 <!doctype HTML>
 <html>
-    <head><title>Login thing</title></head>
+    <head><title>Login</title></head>
     <body>
-        this is a test
+        <form action="/login" method="post">
+            <p>Please login</p>
+            Username: <input type="text" name="username" autofocus><br>
+            Password: <input type="password" name="password"><br>
+            <input type="submit" value="Submit" />
+        </form>
+        <h1>{{error}}</h1>
     </body>
 </html>

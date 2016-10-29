@@ -1,0 +1,14 @@
+<!doctype HTML>
+<html>
+    <head><title>Dashboard</title></head>
+    <body>
+        <h1>You have been successfully authenticated. Welcome to the dashboard!</h1>
+        {% if role == 'ADM' %}
+        <h3><a href="/admin_info">Link for admins</a></h3>
+        {% endif %}
+        {% if role == 'ADM' or role == 'SUP' %}
+        <h3><a href="/admin_supervisor_info">Link for admins and supervisors</a></h3>
+        {% endif %}
+        <h3><a href="/logout">Logout</a></h3>
+    </body>
+</html>
