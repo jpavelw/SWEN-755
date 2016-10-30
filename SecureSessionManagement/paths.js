@@ -57,9 +57,6 @@ var checksession = function(request, callback){
 exports.index = function(request, response, next){
     "use strict";
 
-    //uncomment next line to initialize the database
-    //DB.init();
-
     var session = request.session;
 
     if(session.time){
@@ -125,6 +122,8 @@ exports.login = function(request, response, next){
             //do something else with the user. Redirect to some other page or ...
             response.render('login', {error: "Wrong credentials"});
         }
+    }).catch(function(error){
+        response.render('login', {error: "User could not have been retrieved"});
     });
 };
 
@@ -250,7 +249,7 @@ exports.admin_supervisor_info = function(request, response){
     }
 };
 
-exports.logout = function(request, response){
+exports.logout = function(request, response, next){
     "use strict";
 
     var session = request.session;
@@ -264,5 +263,8 @@ exports.logout = function(request, response){
         //destroy session and take to login
         session.destroy(function(error){ });
         response.redirect("/");
+    }).catch(function(error){
+        error.message = "User could not have been retrieved";
+        next(error);
     });
 };
