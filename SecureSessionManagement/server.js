@@ -15,6 +15,7 @@ nunjucks.configure('views',{
 
 app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
+app.use('/static', express.static(__dirname + '/static'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(session({
@@ -31,6 +32,7 @@ function errorHandler(error, request, response, next){
     response.render('error_template', {error: error.message});
 }
 
+//definition of gets and posts allowed
 app.post('/login', paths.login, paths.dashboard);
 app.get('/', paths.index, paths.dashboard);
 app.get('/dashboard', paths.dashboard);

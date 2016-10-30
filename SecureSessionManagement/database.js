@@ -1,9 +1,11 @@
 "use strict"
 
-var Sequelize = require('sequelize');
-var sequelize = new Sequelize("sqlite://users.db");
+var Sequelize = require('sequelize'),
+    encryption = require('./encryption'),
+    sequelize = new Sequelize("sqlite://users.db", {logging: false});
 
-exports.User = sequelize.define('user', {
+//definition of model and DB structure
+var User = sequelize.define('user', {
     username: {
         type: Sequelize.STRING,
         unique: true,
@@ -22,15 +24,26 @@ exports.User = sequelize.define('user', {
     }
 });
 
+exports.User = User;
+
+//initialize the DB with users
 exports.init = function(){
     User.sync({force: true}).then(function(){
         console.log("User table created");
-        User.create({username: "jai", password: "12345", roleid: "ADM"}).then(function(){
-            console.log("User admin created");
-            User.create({username: "arun", password: "09876", roleid: "SUP"}).then(function(){
+        //encrypt password
+        encryption.encryptpassword("12345", function(result){
+            //create admin user with username admin, password 12345
+            User.create({username: "admin", password: result, roleid: "ADM"}).then(function(){
+                console.log("User admin created");
+            });
+        });
+        //encrypt password
+        encryption.encryptpassword("09876", function(result){
+            //create supervisor user with username super, password 09876
+            User.create({username: "super", password: result, roleid: "SUP"}).then(function(){
                 console.log("User supervisor created");
             })
-        })
+        });
     }).catch(function(error){
         console.log(error);
     });

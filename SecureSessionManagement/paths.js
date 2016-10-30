@@ -1,13 +1,14 @@
-var DB = require('./database');
+var DB = require('./database'),
+    encryption = require('./encryption');
 
 var checkexpiration = function(request, callback){
     //1 minute, time in miliseconds
     //change first value to modify time in seconds
-    var maxSessionTime = 20 * 1000;
+    var maxSessionTime = 60 * 1000;
 
     var session = request.session;
+    //current time minus time of last activity
     var difference = Date.now() - session.time;
-    console.log("Time difference - " + difference);
     if(difference < maxSessionTime){
         //the session hasn't expired, less than a minute
         session.time = Date.now();
@@ -26,6 +27,7 @@ var checksession = function(request, callback){
     var session = request.session;
     DB.User.findOne({where: {username: session.username}}).then(function(user){
         if(user){
+            //ensures sessionid and roleid matches
             if(user.sessionid == session.id && user.roleid == session.roleid){
                 //username in session founf in db. matches session id and roleid
                 callback(true);
@@ -55,68 +57,72 @@ var checksession = function(request, callback){
 exports.index = function(request, response, next){
     "use strict";
 
+    //uncomment next line to initialize the database
+    //DB.init();
+
     var session = request.session;
 
     if(session.time){
+        //first check user inactivity time
         checkexpiration(request, function(result){
             if(result){
+                //inactive for too long. logout to destroy the session
                 response.redirect('/logout');
             } else {
+                //still active. check for username in session
                 if(session.username){
-                    console.log("Before");
+                    //check for session info
                     checksession(request, function(result){
-                        console.log(result);
-                        console.log("After");
                         if(result){
+                            //everything well
                             response.redirect("/dashboard");
                         } else {
+                            //something wrong, ask to login
                             response.render('login');
                         }
                     });
                 } else {
+                    //no username found, login
                     response.render('login');
                 }
             }
         });
     } else {
+        //no last activity time found
         response.render('login');
     }
 }
 
 exports.login = function(request, response, next){
 
-    console.log(request.body);
-    console.log(request.session.id);
-    console.log(request.sessionID);
-
-    //uncomment next line to initialize the database
-    //DB.init();
+    //this process can be improved by removing spaces from username
+    //plus by lowercasing the username, but that'd have to be discussed with the
+    //customer
 
     DB.User.findOne({where: {username: request.body.username}}).then(function(user){
-        //TODO No matter capitals, remove spaces
         if(user){
             //we found the user in the database
-            console.log("User found " + user.username);
-            if(user.password === request.body.password){
-                console.log("Password match, go ahead");
-                console.log(request.session);
-                var session = request.session;
-
-                user.sessionid = session.id;
-                user.save().then(function(){
-                    session.username = user.username;
-                    session.roleid = user.roleid;
-                    session.time = Date.now();
-                    console.log("User saved");
-                    response.redirect("/dashboard");
-                });
-            } else {
-                console.log("Unknown user");
-                response.render('login', {error: "Wrong credentials"});
-            }
+            //ensure passwords match
+            encryption.checkpassword(request.body.password, user.password, function(result){
+                if(result){
+                    var session = request.session;
+                    //set sessionid to user then save in the database
+                    user.sessionid = session.id;
+                    user.save().then(function(){
+                        //save information in session
+                        session.username = user.username;
+                        session.roleid = user.roleid;
+                        session.time = Date.now();
+                        response.redirect("/dashboard");
+                    });
+                } else {
+                    //passwords do not match
+                    response.render('login', {error: "Wrong credentials"});
+                }
+            });
         } else {
+            //user not found
             //do something else with the user. Redirect to some other page or ...
-            console.log("Unknown user");
             response.render('login', {error: "Wrong credentials"});
         }
     });
@@ -126,27 +132,34 @@ exports.dashboard = function(request, response){
     "use strict";
 
     var session = request.session;
-    console.log(session);
 
     if(session.time){
+        //first check user inactivity time
         checkexpiration(request, function(result){
             if(result){
+                //inactive for too long. logout to destroy the session
                 response.redirect('/logout');
             } else {
+                //still active. check for username in session
                 if(session.username){
+                    //check for session info
                     checksession(request, function(result){
                         if(result){
+                            //everything well
                             response.render('dashboard', {'role': session.roleid});
                         } else {
+                            //something wrong, ask to login
                             response.redirect("/");
                         }
                     });
                 } else {
+                    //no username found, login
                     response.redirect("/");
                 }
             }
         });
     } else {
+        //no last activity time found
         response.redirect("/");
     }
 };
@@ -155,31 +168,41 @@ exports.admin_info = function(request, response){
     "use strict";
 
     var session = request.session;
-    console.log(session);
 
     if(session.time){
+        //first check user inactivity time
         checkexpiration(request, function(result){
             if(result){
+                //inactive for too long. logout to destroy the session
                 response.redirect('/logout');
             } else {
+                //still active. check for username in session
                 if(session.username){
+                    //check for session info
                     checksession(request, function(result){
                         if(result){
+                            //check por permissions for the requested page
                             if(session.roleid == "ADM"){
+                                //everything well
                                 response.render('admin_info');
                             } else {
+                                //no permission to access this resource. take to
+                                //dashboard
                                 response.redirect("/dashboard");
                             }
                         } else {
+                            //something wrong, ask to login
                             response.redirect("/");
                         }
                     });
                 } else {
+                    //no username found, login
                     response.redirect("/");
                 }
             }
         });
     } else {
+        //no last activity time found
         response.redirect("/");
     }
 };
@@ -188,31 +211,41 @@ exports.admin_supervisor_info = function(request, response){
     "use strict";
 
     var session = request.session;
-    console.log(session);
 
     if(session.time){
+        //first check user inactivity time
         checkexpiration(request, function(result){
             if(result){
+                //inactive for too long. logout to destroy the session
                 response.redirect('/logout');
             } else {
+                //still active. check for username in session
                 if(session.username){
+                    //check for session info
                     checksession(request, function(result){
                         if(result){
+                            //check por permissions for the requested page
                             if(['ADM', 'SUP'].indexOf(session.roleid)>=0){
+                                //everything well
                                 response.render('admin_supervisor_info');
                             } else {
+                                //no permission to access this resource. take to
+                                //dashboard
                                 response.redirect("/dashboard");
                             }
                         } else {
+                            //something wrong, ask to login
                             response.redirect("/");
                         }
                     });
                 } else {
+                    //no username found, login
                     response.redirect("/");
                 }
             }
         });
     } else {
+        //no last activity time found
         response.redirect("/");
     }
 };
@@ -221,16 +254,15 @@ exports.logout = function(request, response){
     "use strict";
 
     var session = request.session;
-    console.log(session);
-
+    //find username in session
     DB.User.findOne({where: {username: session.username}}).then(function(user){
         if(user){
+            //username found. delete sessionid from db
             user.sessionid = null;
             user.save().then(function(){ });
         }
-
+        //destroy session and take to login
         session.destroy(function(error){ });
-
         response.redirect("/");
     });
 };
