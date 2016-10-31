@@ -1,11 +1,13 @@
 var DB = require('./database'),
     encryption = require('./encryption');
 
-var checkexpiration = function(request, callback){
-    //1 minute, time in miliseconds
-    //change first value to modify time in seconds
-    var maxSessionTime = 60 * 1000;
+//1 minute, time in miliseconds
+//change first value to modify time in seconds
+const timeInSeconds = 60;
 
+var checkexpiration = function(request, callback){
+
+    var maxSessionTime = timeInSeconds * 1000;
     var session = request.session;
     //current time minus time of last activity
     var difference = Date.now() - session.time;
