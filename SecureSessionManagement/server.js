@@ -2,7 +2,6 @@
 
 var express = require('express'),
     bodyParser = require('body-parser'),
-    assert = require('assert'),
     nunjucks = require('nunjucks'),
     session = require('express-session'),
     paths = require('./paths'),
@@ -19,7 +18,7 @@ app.use('/static', express.static(__dirname + '/static'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'A9X45LH37V0B',
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: false, expires: false } //makes cookie expire after closing the browser
